@@ -1,12 +1,14 @@
 # R2E Query Engine
 
-A semantic code query tool for extracting insights and generating research trajectories from code repositories analyzed with R2E.
+A semantic code query tool for extracting insights, generating research trajectories, and visualizing code relationships from repositories analyzed with R2E.
 
 ## Features
 
 - **Semantic Code Search**: Find functions across repositories based on natural language queries
 - **Research Trajectory Generation**: Generate novel research directions by combining code from multiple repositories
 - **Prototype Generation**: Create code prototypes implementing the generated research ideas
+- **Code Relationship Visualization**: Generate graph visualizations showing relationships between functions
+- **Pattern Detection**: Automatically identify common patterns in code (AST processing, control flow, etc.)
 - **Self-installing Wrapper**: Uses uv (or falls back to venv) for a seamless setup experience
 
 ## Quick Start
@@ -163,6 +165,50 @@ The R2E Query Engine is designed to be extensible. You can modify `r2e_query_eng
 - Implementing more sophisticated code analysis techniques
 - Enhancing the research trajectory generation with domain-specific knowledge
 - Integrating with other tools in your development workflow
+
+## Code Relationship Visualization
+
+The R2E Query Engine now includes tools for visualizing relationships between functions in the repositories.
+
+### Visualize from Documentation
+
+Process all queries from the research documentation and generate visualizations:
+
+```bash
+./test_prototype.py --from_docs --depth 2
+```
+
+This will:
+1. Extract all queries and results from the research documentation
+2. Build relationship graphs for each query
+3. Detect patterns in the functions
+4. Generate visualizations in the `docs/graphs/` directory
+
+### Visualize a Specific Query
+
+You can also visualize relationships for a specific query:
+
+```bash
+./test_prototype.py --exp_id talkhier_exp --query "graph traversal" --depth 2
+```
+
+Parameters:
+- `--exp_id`: The experiment ID to analyze
+- `--query`: The search query (optional, all functions if not provided)
+- `--depth`: Relationship depth to include (default 1)
+- `--output`: Output file path for the visualization (default: docs/graphs/{exp_id}_{query}.png)
+
+### Pattern Detection
+
+The visualization tools also detect common patterns in the code:
+
+- AST processing
+- Graph operations
+- Control flow
+- Data flow
+- Visualization
+
+This helps understand the purpose and functionality of the code without having to read through all the implementation details.
 
 ## Future Vision: Research Paper Integration
 
