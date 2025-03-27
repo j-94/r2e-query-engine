@@ -316,7 +316,7 @@ IMPORTANT: Only include functions that are genuinely relevant to the query.
             if self.use_openrouter:
                 try:
                     # Use OpenRouter client
-                    print("Making OpenRouter API request with Google Gemini 2.5...")
+                    print("Making OpenRouter API request with OpenAI GPT-4o...")
                     
                     # Wrap the prompt to emphasize JSON format
                     json_prompt = f"""
@@ -337,10 +337,10 @@ Example response format:
 }}
 """
                     
-                    # Try to use Google Gemini 2.5 Pro Flash if available (or fall back to a similar model)
+                    # Try to use OpenAI GPT-4o if available
                     try:
                         response = self.client.chat_completions_create(
-                            model="google/gemini-pro",  # Using Google Gemini Pro
+                            model="openai/gpt-4o-2024-05-13",  # Using OpenAI GPT-4o
                             messages=[
                                 {"role": "system", "content": "You are a code analysis assistant that helps find relevant functions in repositories. You MUST return valid JSON."},
                                 {"role": "user", "content": json_prompt}
@@ -349,7 +349,7 @@ Example response format:
                             temperature=0.2
                         )
                     except Exception as e:
-                        print(f"Failed to use Gemini: {e}, falling back to GPT model")
+                        print(f"Failed to use GPT-4o: {e}, falling back to GPT-3.5")
                         response = self.client.chat_completions_create(
                             model="openai/gpt-3.5-turbo",  # Fallback to GPT-3.5-Turbo 
                             messages=[
@@ -531,10 +531,10 @@ Example response format:
 }}
 """
                     
-                    # Try to use Google Gemini Pro for research trajectory generation
+                    # Try to use OpenAI GPT-4o for research trajectory generation
                     try:
                         response = self.client.chat_completions_create(
-                            model="google/gemini-pro",  # Using Google Gemini Pro
+                            model="openai/gpt-4o-2024-05-13",  # Using OpenAI GPT-4o
                             messages=[
                                 {"role": "system", "content": "You are a research assistant that helps identify promising and creative research directions. You MUST return valid JSON."},
                                 {"role": "user", "content": json_prompt}
@@ -543,7 +543,7 @@ Example response format:
                             temperature=0.7  # Higher temperature for more creative research ideas
                         )
                     except Exception as e:
-                        print(f"Failed to use Gemini for research generation: {e}, falling back to GPT model")
+                        print(f"Failed to use GPT-4o for research generation: {e}, falling back to GPT-3.5")
                         response = self.client.chat_completions_create(
                             model="openai/gpt-3.5-turbo",  # Fallback to GPT-3.5-Turbo
                             messages=[
@@ -666,10 +666,10 @@ The code should be well-structured, properly commented, and follow best practice
 Include proper error handling and make the code modular and maintainable.
 """
                     
-                    # Try to use Google Gemini Pro for code generation
+                    # Try to use OpenAI GPT-4o for code generation
                     try:
                         response = self.client.chat_completions_create(
-                            model="google/gemini-pro",  # Using Google Gemini Pro
+                            model="openai/gpt-4o-2024-05-13",  # Using OpenAI GPT-4o
                             messages=[
                                 {"role": "system", "content": "You are a research code generator that creates prototype implementations. You excel at writing clean, efficient Python code. Respond with ONLY valid Python code."},
                                 {"role": "user", "content": code_prompt}
@@ -677,7 +677,7 @@ Include proper error handling and make the code modular and maintainable.
                             temperature=0.2  # Lower temperature for more focused code generation
                         )
                     except Exception as e:
-                        print(f"Failed to use Gemini for code generation: {e}, falling back to GPT model")
+                        print(f"Failed to use GPT-4o for code generation: {e}, falling back to GPT-3.5")
                         response = self.client.chat_completions_create(
                             model="openai/gpt-3.5-turbo",  # Fallback to GPT-3.5-Turbo
                             messages=[
