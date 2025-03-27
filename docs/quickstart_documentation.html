@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Documentation for quickstart</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1, h2, h3, h4 { color: #333; }
+        h2 {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+        .navigation {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Documentation for quickstart</h1>
+<h2>Overview</h2>
+<p>This documentation was automatically generated for the quickstart experiment. It contains 71 functions from the extracted repositories.</p>
+<h2>Functions by Repository</h2>
+<h3>Repository: python-graphs</h3>
+<p>Contains 71 functions.</p>
+<h4>make_node_from_instruction</h4>
+<p>File: <code>python_graphs.program_graph</code></p>
+<pre><code class="language-python">def make_node_from_instruction(instruction):
+    &quot;&quot;&quot;Creates a ProgramGraphNode corresponding to an existing Instruction.
+
+  Args:
+    instruction: An Instruction object.
+
+  Returns:
+    A ProgramGraphNode corresponding to that instruction.
+  &quot;&quot;&quot;
+    ast_node = instruction.node
+    node = make_node_from_ast_node(ast_node)
+    node.instruction = instruction
+    return node
+</code></pre>
+<h4>make_node_from_ast_node</h4>
+<p>File: <code>python_graphs.program_graph</code></p>
+<pre><code class="language-python">def make_node_from_ast_node(ast_node):
+    &quot;&quot;&quot;Creates a program graph node for the provided AST node.
+
+  This is only called when the AST node doesn't already correspond to an
+  Instruction in the program's control flow graph.
+
+  Args:
+    ast_node: An AST node from the program being analyzed.
+
+  Returns:
+    A node in the program graph corresponding to the AST node.
+  &quot;&quot;&quot;
+    node = ProgramGraphNode()
+    node.node_type = pb.NodeType.AST_NODE
+    node.id = program_utils.unique_id()
+    node.ast_node = ast_node
+    node.ast_type = type(ast_node).__name__
+    return node
+</code></pre>
+<h4>make_node_from_ast_value</h4>
+<p>File: <code>python_graphs.program_graph</code></p>
+<pre><code class="language-python">def make_node_from_ast_value(value):
+    &quot;&quot;&quot;Creates a ProgramGraphNode for the provided value.
+
+  `value` is a primitive value appearing in a Python AST.
+
+  For example, the number 1 in Python has AST Num(n=1). In this, the value '1'
+  is a primitive appearing in the AST. It gets its own ProgramGraphNode with
+  node_type AST_VALUE.
+
+  Args:
+    value: A primitive value appearing in an AST.
+
+  Returns:
+    A ProgramGraphNode corresponding to the provided value.
+  &quot;&quot;&quot;
+    node = ProgramGraphNode()
+    node.node_type = pb.NodeType.AST_VALUE
+    node.id = program_utils.unique_id()
+    node.ast_value = value
+    return node
+</code></pre>
+<h4>to_graphviz</h4>
+<p>File: <code>python_graphs.program_graph_graphviz</code></p>
+<pre><code class="language-python">def to_graphviz(graph):
+    &quot;&quot;&quot;Creates a graphviz representation of a ProgramGraph.
+
+  Args:
+    graph: A ProgramGraph object to visualize.
+  Returns:
+    A pygraphviz object representing the ProgramGraph.
+  &quot;&quot;&quot;
+    g = pygraphviz.AGraph(strict=False, directed=True)
+    for unused_key, node in graph.nodes.items():
+        node_attrs = {}
+        if node.ast_type:
+            node_attrs['label'] = six.ensure_str(node.ast_type, 'utf-8')
+        else:
+            node_attrs['shape'] = 'point'
+        node_type_colors = {}
+        if node.node_type in node_type_colors:
+            node_attrs['color'] = node_type_colors[node.node_type]
+            node_attrs['colorscheme'] = 'svg'
+        g.add_node(node.id, **node_attrs)
+    for edge in graph.edges:
+        edge_attrs = {}
+        edge_attrs['label'] = edge.type.name
+        edge_colors = {pb.EdgeType.LAST_READ: 'red', pb.EdgeType.LAST_WRITE: 'red'}
+        if edge.type in edge_colors:
+            edge_attrs['color'] = edge_colors[edge.type]
+            edge_attrs['colorscheme'] = 'svg'
+        g.add_edge(edge.id1, edge.id2, **edge_attrs)
+    return g
+</code></pre>
+<h4>get_control_flow_graph</h4>
+<p>File: <code>python_graphs.control_flow</code></p>
+<pre><code class="language-python">def get_control_flow_graph(program):
+    &quot;&quot;&quot;Get a ControlFlowGraph for the provided AST node.
+
+  Args:
+    program: Either an AST node, source string, or a function.
+  Returns:
+    A ControlFlowGraph.
+  &quot;&quot;&quot;
+    control_flow_visitor = ControlFlowVisitor()
+    node = program_utils.program_to_ast(program)
+    control_flow_visitor.run(node)
+    return control_flow_visitor.graph
+</code></pre>
+<h4>getsource</h4>
+<p>File: <code>python_graphs.program_utils</code></p>
+<pre><code class="language-python">def getsource(obj):
+    &quot;&quot;&quot;Gets the source for the given object.
+
+  Args:
+    obj: A module, class, method, function, traceback, frame, or code object.
+  Returns:
+    The source of the object, if available.
+  &quot;&quot;&quot;
+    if inspect.ismethod(obj):
+        func = obj.__func__
+    else:
+        func = obj
+    source = inspect.getsource(func)
+    return textwrap.dedent(source)
+</code></pre>
+<h4>program_to_ast</h4>
+<p>File: <code>python_graphs.program_utils</code></p>
+<pre><code class="language-python">def program_to_ast(program):
+    &quot;&quot;&quot;Convert a program to its AST.
+
+  Args:
+    program: Either an AST node, source string, or a function.
+  Returns:
+    The root AST node of the AST representing the program.
+  &quot;&quot;&quot;
+    if isinstance(program, ast.AST):
+        return program
+    if isinstance(program, six.string_types):
+        source = program
+    else:
+        source = getsource(program)
+    module_node = ast.parse(source, mode='exec')
+    return module_node
+</code></pre>
+<h4>get_accesses_from_ast_node</h4>
+<p>File: <code>python_graphs.instruction</code></p>
+<pre><code class="language-python">def get_accesses_from_ast_node(node):
+    &quot;&quot;&quot;Get all accesses for an AST node, in depth-first AST field order.&quot;&quot;&quot;
+    visitor = AccessVisitor()
+    visitor.visit(node)
+    return visitor.accesses
+</code></pre>
+<h4>cyclomatic_complexity</h4>
+<p>File: <code>python_graphs.cyclomatic_complexity</code></p>
+<pre><code class="language-python">def cyclomatic_complexity(control_flow_graph):
+    &quot;&quot;&quot;Computes the cyclomatic complexity of a function from its cfg.&quot;&quot;&quot;
+    enter_block = next(control_flow_graph.get_enter_blocks())
+    new_blocks = []
+    seen_block_ids = set()
+    new_blocks.append(enter_block)
+    seen_block_ids.add(id(enter_block))
+    num_edges = 0
+    while new_blocks:
+        block = new_blocks.pop()
+        for next_block in block.exits_from_end:
+            num_edges += 1
+            if id(next_block) not in seen_block_ids:
+                new_blocks.append(next_block)
+                seen_block_ids.add(id(next_block))
+    num_nodes = len(seen_block_ids)
+    p = 1
+    e = num_edges
+    n = num_nodes
+    return e - n + 2 * p
+</code></pre>
+<h4>cyclomatic_complexity2</h4>
+<p>File: <code>python_graphs.cyclomatic_complexity</code></p>
+<pre><code class="language-python">def cyclomatic_complexity2(control_flow_graph):
+    &quot;&quot;&quot;Computes the cyclomatic complexity of a program from its cfg.&quot;&quot;&quot;
+    p = 1
+    e = sum((len(block.exits_from_end) for block in control_flow_graph.blocks))
+    n = len(control_flow_graph.blocks)
+    return e - n + 2 * p
+</code></pre>
+<h4>cyclomatic_complexity3</h4>
+<p>File: <code>python_graphs.cyclomatic_complexity</code></p>
+<pre><code class="language-python">def cyclomatic_complexity3(control_flow_graph):
+    &quot;&quot;&quot;Computes the cyclomatic complexity of a program from its cfg.&quot;&quot;&quot;
+    start_block = control_flow_graph.start_block
+    enter_blocks = control_flow_graph.get_enter_blocks()
+    new_blocks = [start_block]
+    seen_block_ids = {id(start_block)}
+    num_connected_components = 1
+    num_edges = 0
+    for enter_block in enter_blocks:
+        new_blocks.append(enter_block)
+        seen_block_ids.add(id(enter_block))
+        num_connected_components += 1
+    while new_blocks:
+        block = new_blocks.pop()
+        for next_block in block.exits_from_end:
+            num_edges += 1
+            if id(next_block) not in seen_block_ids:
+                new_blocks.append(next_block)
+                seen_block_ids.add(id(next_block))
+    num_nodes = len(seen_block_ids)
+    p = num_connected_components
+    e = num_edges
+    n = num_nodes
+    return e - n + 2 * p
+</code></pre>
+<h4>get_label</h4>
+<p>File: <code>python_graphs.control_flow_graphviz</code></p>
+<pre><code class="language-python">def get_label(block):
+    &quot;&quot;&quot;Gets the source code for a control flow basic block.&quot;&quot;&quot;
+    lines = []
+    for control_flow_node in block.control_flow_nodes:
+        instruction = control_flow_node.instruction
+        line = get_label_for_instruction(instruction)
+        if line.strip():
+            lines.append(line)
+    return LEFT_ALIGN.join(lines) + LEFT_ALIGN
+</code></pre>
+<h4>ast_height</h4>
+<p>File: <code>python_graphs.analysis.program_graph_analysis</code></p>
+<pre><code class="language-python">def ast_height(ast_node):
+    &quot;&quot;&quot;Computes the height of an AST from the given node.
+
+  Args:
+    ast_node: An AST node.
+
+  Returns:
+    The height of the AST starting at ast_node. A leaf node or single-node AST
+    has a height of 1.
+  &quot;&quot;&quot;
+    max_child_height = 0
+    for child_node in ast.iter_child_nodes(ast_node):
+        max_child_height = max(max_child_height, ast_height(child_node))
+    return 1 + max_child_height
+</code></pre>
+<h4>_program_graph_to_nx</h4>
+<p>File: <code>python_graphs.analysis.program_graph_analysis</code></p>
+<pre><code class="language-python">def _program_graph_to_nx(program_graph, directed=False):
+    &quot;&quot;&quot;Converts a ProgramGraph to a NetworkX graph.
+
+  Args:
+    program_graph: A ProgramGraph.
+    directed: Whether the graph should be treated as a directed graph.
+
+  Returns:
+    A NetworkX graph that can be analyzed by the networkx module.
+  &quot;&quot;&quot;
+    dict_of_lists = {}
+    for node in program_graph.all_nodes():
+        neighbor_ids = [neighbor.id for neighbor in program_graph.outgoing_neighbors(node)]
+        dict_of_lists[node.id] = neighbor_ids
+    return nx.DiGraph(dict_of_lists) if directed else nx.Graph(dict_of_lists)
+</code></pre>
+<h4>diameter</h4>
+<p>File: <code>python_graphs.analysis.program_graph_analysis</code></p>
+<pre><code class="language-python">def diameter(graph):
+    &quot;&quot;&quot;Returns the diameter of a ProgramGraph.
+
+  Note: this is very slow for large graphs.
+
+  Args:
+    graph: A ProgramGraph.
+
+  Returns:
+    The diameter of the graph. A single-node graph has diameter 0. The graph is
+    treated as an undirected graph.
+
+  Raises:
+    networkx.exception.NetworkXError: Raised if the graph is not connected.
+  &quot;&quot;&quot;
+    nx_graph = _program_graph_to_nx(graph, directed=False)
+    return nx.algorithms.distance_measures.diameter(nx_graph)
+</code></pre>
+<h4>max_betweenness</h4>
+<p>File: <code>python_graphs.analysis.program_graph_analysis</code></p>
+<pre><code class="language-python">def max_betweenness(graph):
+    &quot;&quot;&quot;Returns the maximum node betweenness centrality in a ProgramGraph.
+
+  Note: this is very slow for large graphs.
+
+  Args:
+    graph: A ProgramGraph.
+
+  Returns:
+    The maximum betweenness centrality value among all nodes in the graph. The
+    graph is treated as an undirected graph.
+  &quot;&quot;&quot;
+    nx_graph = _program_graph_to_nx(graph, directed=False)
+    return max(nx.algorithms.centrality.betweenness_centrality(nx_graph).values())
+</code></pre>
+<h4>get_percentiles</h4>
+<p>File: <code>python_graphs.analysis.run_program_graph_analysis</code></p>
+<pre><code class="language-python">def get_percentiles(data, percentiles, integer_valued=True):
+    &quot;&quot;&quot;Returns a dict of percentiles of the data.
+
+  Args:
+    data: An unsorted list of datapoints.
+    percentiles: A list of ints or floats in the range [0, 100] representing the
+      percentiles to compute.
+    integer_valued: Whether or not the values are all integers. If so,
+      interpolate to the nearest datapoint (instead of computing a fractional
+      value between the two nearest datapoints).
+
+  Returns:
+    A dict mapping each element of percentiles to the computed result.
+  &quot;&quot;&quot;
+    interpolation = 'nearest' if integer_valued else 'linear'
+    results = np.percentile(data, percentiles, interpolation=interpolation)
+    return {percentiles[i]: results[i] for i in range(len(percentiles))}
+</code></pre>
+<h4>analyze_graph</h4>
+<p>File: <code>python_graphs.analysis.run_program_graph_analysis</code></p>
+<pre><code class="language-python">def analyze_graph(graph, identifier):
+    &quot;&quot;&quot;Performs various analyses on a graph.
+
+  Args:
+    graph: A ProgramGraph to analyze.
+    identifier: A unique identifier for this graph (for later aggregation).
+
+  Returns:
+    A pair (identifier, result_dict), where result_dict contains the results of
+    analyses run on the graph.
+  &quot;&quot;&quot;
+    num_nodes = program_graph_analysis.num_nodes(graph)
+    num_edges = program_graph_analysis.num_edges(graph)
+    ast_height = program_graph_analysis.graph_ast_height(graph)
+    degree_percentiles = [10, 25, 50, 75, 90]
+    degrees = get_percentiles(program_graph_analysis.degrees(graph), degree_percentiles)
+    in_degrees = get_percentiles(program_graph_analysis.in_degrees(graph), degree_percentiles)
+    out_degrees = get_percentiles(program_graph_analysis.out_degrees(graph), degree_percentiles)
+    diameter = program_graph_analysis.diameter(graph)
+    max_betweenness = program_graph_analysis.max_betweenness(graph)
+    result_dict = {'num_nodes': num_nodes, 'num_edges': num_edges, 'ast_height': ast_height, 'degrees': degrees, 'in_degrees': in_degrees, 'out_degrees': out_degrees, 'diameter': diameter, 'max_betweenness': max_betweenness}
+    return (identifier, result_dict)
+</code></pre>
+<h4></h4>
+<p>File: <code>python_graphs.program_graph</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.program_graph</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.program_graph</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.program_graph</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.program_graph</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.program_graph</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.program_graph</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.program_graph</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.program_graph</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.program_graph</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.program_graph</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.program_graph</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.program_graph</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.program_graph</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.program_graph</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.program_graph</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.program_graph</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.control_flow</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.control_flow</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.control_flow</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.control_flow</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.control_flow</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.control_flow</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.control_flow</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.control_flow</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.control_flow</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.control_flow</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.control_flow</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.control_flow</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.control_flow</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.control_flow</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.control_flow</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.control_flow</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.control_flow</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.control_flow</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.control_flow</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.control_flow</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.control_flow</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.control_flow</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.control_flow</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.data_flow</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.data_flow</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.data_flow</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.program_graph_test</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.program_graph_test</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.instruction</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.instruction</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.analysis.program_graph_analysis_test</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.analysis.program_graph_analysis_test</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.analysis.program_graph_analysis_test</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.analysis.program_graph_analysis_test</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.analysis.program_graph_analysis_test</code></p>
+<h4></h4>
+<p>File: <code>python_graphs.analysis.program_graph_analysis_test</code></p>
+<h2>Function Relationships</h2>
+<p>Common relationships between functions:</p>
+<h3>Functions in python_graphs.program_graph</h3>
+<ul>
+<li>make_node_from_instruction</li>
+<li>make_node_from_ast_node</li>
+<li>make_node_from_ast_value</li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+</ul>
+<h3>Functions in python_graphs.control_flow</h3>
+<h2>- get_control_flow_graph</h2>
+<h2>-</h2>
+<h2>-</h2>
+<h2>-</h2>
+<h2>-</h2>
+<h2>-</h2>
+<h2>-</h2>
+<h2>-</h2>
+<h2>-</h2>
+<h2>-</h2>
+<h2>-</h2>
+<h2>-</h2>
+<h3>Functions in python_graphs.program_utils</h3>
+<ul>
+<li>getsource</li>
+<li>program_to_ast</li>
+</ul>
+<h3>Functions in python_graphs.instruction</h3>
+<h2>- get_accesses_from_ast_node</h2>
+<ul>
+<li></li>
+</ul>
+<h3>Functions in python_graphs.cyclomatic_complexity</h3>
+<ul>
+<li>cyclomatic_complexity</li>
+<li>cyclomatic_complexity2</li>
+<li>cyclomatic_complexity3</li>
+</ul>
+<h3>Functions in python_graphs.analysis.program_graph_analysis</h3>
+<ul>
+<li>ast_height</li>
+<li>_program_graph_to_nx</li>
+<li>diameter</li>
+<li>max_betweenness</li>
+</ul>
+<h3>Functions in python_graphs.analysis.run_program_graph_analysis</h3>
+<ul>
+<li>get_percentiles</li>
+<li>analyze_graph</li>
+</ul>
+<h3>Functions in python_graphs.data_flow</h3>
+<h2>-</h2>
+<ul>
+<li></li>
+</ul>
+<h3>Functions in python_graphs.program_graph_test</h3>
+<h2>-</h2>
+<h3>Functions in python_graphs.analysis.program_graph_analysis_test</h3>
+<h2>-</h2>
+<h2>-</h2>
+<h2>-</h2>
+    <script>
+        // Add table of contents
+        window.onload = function() {
+            const toc = document.createElement('div');
+            toc.className = 'navigation';
+            toc.innerHTML = '<h3>Table of Contents</h3><ul></ul>';
+            
+            const headings = document.querySelectorAll('h2, h3, h4');
+            const tocList = toc.querySelector('ul');
+            
+            headings.forEach(function(heading) {
+                const link = document.createElement('a');
+                link.textContent = heading.textContent;
+                link.href = '#' + heading.id;
+                
+                if (!heading.id) {
+                    heading.id = heading.textContent.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                }
+                
+                const item = document.createElement('li');
+                item.style.marginLeft = (heading.tagName.substring(1) - 2) * 10 + 'px';
+                item.appendChild(link);
+                tocList.appendChild(item);
+            });
+            
+            document.body.appendChild(toc);
+        };
+    </script>
+</body>
+</html>

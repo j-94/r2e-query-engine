@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R2E Query Engine Research Documentation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1, h2, h3, h4 {
+            color: #2c3e50;
+        }
+        h2 {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-top: 30px;
+        }
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+        div {
+            margin-bottom: 30px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .timestamp {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+        .navigation {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>R2E Query Engine Research Documentation</h1>
+<p><em>This is an automatically generated living document of your research.</em></p>
+<h2>Repository: PAE (PAE_exp) 2025-03-27 14:56:02</h2>
+<div id='repo-1743087362'>
+
+* **URL**: [https://github.com/amazon-science/PAE](https://github.com/amazon-science/PAE)
+* **Added**: 2025-03-27 14:56:02
+* **Experiment ID**: `PAE_exp`
+
+### Initial Assessment
+
+Repository added to the R2E Query Engine. Use the following command to search this repository:
+
+
+<pre><code class="language-bash">./r2e_query_engine.py --exp_id PAE_exp --query &quot;your search query&quot;
+</code></pre>
+
+
+</div>
+
+<h2>Repository: public (gate_exp) 2025-03-27 15:28:08</h2>
+<div id='repo-1743089288'>
+
+* **URL**: [https://github.com/foundation-interface/graphologue/tree/public](https://github.com/foundation-interface/graphologue/tree/public)
+* **Added**: 2025-03-27 15:28:08
+* **Experiment ID**: `gate_exp`
+
+### Initial Assessment
+
+Repository added to the R2E Query Engine. Use the following command to search this repository:
+
+
+<pre><code class="language-bash">./r2e_query_engine.py --exp_id gate_exp --query &quot;your search query&quot;
+</code></pre>
+
+
+</div>
+    <script>
+        // Add a table of contents
+        window.onload = function() {
+            const toc = document.createElement('div');
+            toc.className = 'navigation';
+            toc.innerHTML = '<h3>Table of Contents</h3><ul></ul>';
+            
+            const headings = document.querySelectorAll('h2');
+            const tocList = toc.querySelector('ul');
+            
+            headings.forEach((heading, index) => {
+                const link = document.createElement('a');
+                link.textContent = heading.textContent;
+                link.href = '#' + (heading.parentNode.id || `section-${index}`);
+                
+                if (!heading.parentNode.id) {
+                    heading.parentNode.id = `section-${index}`;
+                }
+                
+                const listItem = document.createElement('li');
+                listItem.appendChild(link);
+                tocList.appendChild(listItem);
+            });
+            
+            document.body.appendChild(toc);
+        };
+    </script>
+</body>
+</html>
