@@ -13,15 +13,16 @@ A semantic code query tool for extracting insights, generating research trajecto
 
 ## Quick Start
 
-1. Ensure you have R2E set up and have extracted functions from at least one repository:
+1. Add a repository to the system using the provided script:
    ```bash
-   # Clone and set up R2E if you haven't already
-   cd /Users/imac/Desktop/r2e_env
-   source env/bin/activate
+   # Add a new repository
+   ./add_repo.sh https://github.com/example/repo my_experiment
    
-   # Extract functions from a repository
-   r2e setup -r https://github.com/example/repo
-   r2e extract -e my_experiment --overwrite_extracted
+   # The script will:
+   # - Clone the repository to the correct location
+   # - Extract functions and methods
+   # - Set up the experiment ID
+   # - Add it to the living documentation
    ```
 
 2. Run the self-installing query engine wrapper:
@@ -55,6 +56,23 @@ Once in the interactive mode, you can use the following commands:
 - `prototype <index>`: Generate a prototype implementation for a research trajectory
 - `help`: Show available commands
 - `exit`: Exit the interactive mode
+
+### Quick Search Scripts
+
+For simple keyword-based searching without requiring API keys:
+
+```bash
+# Search in a single repository
+./r2e-search.sh gate_test "extract" --show-code
+
+# Search across all repositories
+./search-all.sh "graph" --show-code
+
+# Search and visualize relationships
+./r2e-search.sh syncmind_test "agent" --show-code --visualize
+```
+
+These scripts bypass the API key requirements and perform pure keyword searches.
 
 ### Command Line Arguments
 

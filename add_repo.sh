@@ -22,12 +22,26 @@ else
   EXP_NAME=$2
 fi
 
+# Extract organization and repo name from URL
+ORG_REPO=$(echo $REPO_URL | sed -E 's/https:\/\/github.com\/([^\/]+)\/([^\/]+)(\/.*)?/\1___\2/')
+
+# Set paths
+REPOS_DIR=~/buckets/local_repoeval_bucket/repos
+DEST_DIR="$REPOS_DIR/$ORG_REPO"
+
 echo "==== Adding repository: $REPO_URL ===="
 echo "==== Using experiment name: $EXP_NAME ===="
 
-# 1. Set up the repository with R2E
-echo "Setting up repository with R2E..."
-r2e setup -r $REPO_URL -e $EXP_NAME
+# 0. Make sure repos directory exists
+mkdir -p $REPOS_DIR
+
+# 1. Clone the repository
+echo "Cloning repository to $DEST_DIR..."
+if [ -d "$DEST_DIR" ]; then
+  echo "Directory already exists. Removing old repository..."
+  rm -rf "$DEST_DIR"
+fi
+git clone --depth=1 $REPO_URL "$DEST_DIR"
 
 # 2. Extract functions from the repository
 echo "Extracting functions from repository..."
